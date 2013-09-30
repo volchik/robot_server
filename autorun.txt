@@ -1,0 +1,4 @@
+прописать в /etc/rc.local
+
+тест /etc/init.d/rc.local start
+
