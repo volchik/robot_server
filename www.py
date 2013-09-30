@@ -32,7 +32,7 @@ MainHTML = "main.html"
 refreshTime = 5 #every xx sec
 
 #DIRS
-BaseDir  = os.path.abspath("")
+BaseDir  = "/home/odroid/Projects/robot_server" #os.path.abspath("")
 LogDir   = "log"
 PidDir   = "pid"
 

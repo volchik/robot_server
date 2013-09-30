@@ -75,12 +75,12 @@ function LightOn()
 {  
   if (isLightOn)
   {
-    document.getElementById("imgLight").src = "/img/off.jpg";
+    document.getElementById("imgLight").src = "/img/off.png";
     send("light-off");
   }
   else 
   {
-    document.getElementById("imgLight").src = "/img/on.jpg";
+    document.getElementById("imgLight").src = "/img/on.png";
     send("light-on");
   }
   isLightOn = 1-isLightOn;
@@ -146,7 +146,7 @@ $(document).ready(function(){
 
 	<table border="0" align="right" cellspacing="0" cellpadding="0" color="black">
 	<tr>
-                <td align="center"><img border="0" height="50" width="50" id="imgLight" src="/img/off.jpg" onclick="LightOn()"/></td>
+                <td align="center"><img border="0" height="50" width="50" id="imgLight" src="/img/off.png" onclick="LightOn()"/></td>
 		<td align="center"><img border="0" height="50" width="50" src="/img/cam-up.png" onclick="send('cam-up');"/></td> 
 		<td></td>
  	</tr>
