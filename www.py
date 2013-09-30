@@ -32,8 +32,10 @@ MainHTML = "main.html"
 refreshTime = 5 #every xx sec
 
 #DIRS
+BaseDir  = os.path.abspath("")
 LogDir   = "log"
 PidDir   = "pid"
+
 
 class MyHandler(BaseHTTPRequestHandler):	
 	def do_HEAD(self):
@@ -287,9 +289,10 @@ class MyDaemon(Daemon):
 
 
 if __name__ == "__main__":
-        LogDir = os.path.abspath(LogDir)
-        PidDir = os.path.abspath(PidDir)
-        WWWHOME = os.path.abspath(WWWHOME)
+        LogDir = BaseDir + "/" + LogDir
+        PidDir = BaseDir + "/" + PidDir
+        WWWHOME = BaseDir +"/" + WWWHOME
+
         try:
             os.makedirs(LogDir)
             os.makedirs(PidDir)
