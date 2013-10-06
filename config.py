@@ -22,8 +22,8 @@ class Config(object):
         pid_filename      = config.get('pid.filename', 'pid/www.pid')
         self.pid_filename = os.path.join(config_dir, pid_filename)
 
-        self.robot_device = config.get('robot.device', '/dev/ttyUSB0')
-        self.robot_speed  = config.get('robot.speed',  9600)
+        self.robot_port     = config.get('robot.port',     '/dev/ttyUSB0')
+        self.robot_baudrate = config.get('robot.baudrate', 9600)
 
         self.cam_num     = config.get('cam.num',  6)
         self.cam_mode    = config.get('cam.mode', 1)

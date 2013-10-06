@@ -50,22 +50,23 @@ class MyHandler(BaseHTTPRequestHandler):
             return True
         else:
             self.do_AUTHHEAD()
-            self.log_error("[AUTH] Not authenticated")
+            self.log_error('[AUTH] Не авторизирован')
             return False
 
     def showAuthResult(self,message):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        self.wfile.write("<html>")
-        self.wfile.write("<head>")
-        self.wfile.write("<title>Login page</title>")
-        self.wfile.write("</head>")
-        self.wfile.write("<body>")
-        self.wfile.write("<p>")
+        self.wfile.write('<html>')
+        self.wfile.write('<head>')
+        self.wfile.write('<meta content="text/html; charset=UTF-8" http-equiv="content-type">')
+        self.wfile.write('<title>Авторизация</title>')
+        self.wfile.write('</head>')
+        self.wfile.write('<body>')
+        self.wfile.write('<p>')
         self.wfile.write(message)
-        self.wfile.write("</p>")
-        self.wfile.write("</body>")
-        self.wfile.write("</html>")
+        self.wfile.write('</p>')
+        self.wfile.write('</body>')
+        self.wfile.write('</html>')
 
     def showPage(self,method,get_data,post_data):
         if get_data.get('action') != None:
@@ -111,10 +112,10 @@ class MyHandler(BaseHTTPRequestHandler):
                         frameCount = 0
                         frameSize = len(JpegData)/1024
                         frameSpeed = int(8*len(JpegData)*frameFps/1024)
-                        text = "Capture %s fps" % str(frameFps)
-                        text = text + ", Frame size: "+str(frameSize)+"kB"
-                        text = text + ", Capture speed: "+str(frameSpeed)+"kb/s"
-                        self.log_error("[WEBCAM] " + text)
+                        text = u'Захват %s fps' % str(frameFps)
+                        text = text + u', размер изображения: '+str(frameSize)+u'кБ'
+                        text = text + u', скорость захвата: '+str(frameSpeed)+u'кб/с'
+                        self.log_error('[WEBCAM] ' + text)
                         #if not self.do_Auth():
                             #self.log_error("Not authenticated")
                             #break
@@ -133,10 +134,10 @@ class MyHandler(BaseHTTPRequestHandler):
             JpegData=cv2mat.tostring()
             self.wfile.write(JpegData)
         elif action == "temperature": #get temperature
-            text =  self.server.robot.getTemperature()
+            text =  self.server.robot.get_temperature()
             self.wfile.write(text)
         elif action == "pressure": #get pressure"
-            temp = int(self.server.robot.getPressure())
+            temp = int(self.server.robot.get_pressure())
             text = str(int(temp/133.33))
             #text = self.server.robot.getPressure()
             self.wfile.write(text)
@@ -152,9 +153,9 @@ class MyHandler(BaseHTTPRequestHandler):
                     f.close()
                     #self.log_error("file: "+self.path+" has file type "+file_type(self.path))
                 except IOError:
-                    self.send_error(404,'File not found: %s' % self.path)
+                    self.send_error(404,'Файл не найден: %s' % self.path)
             else: #access denied
-                self.send_error(404,'File not found: %s' % self.path)
+                self.send_error(404,'Файл не найден: %s' % self.path)
         else: #MainHTML
             try:
                f = open(self.server.Config.www_home + '/' + self.server.Config.www_main)
@@ -164,11 +165,11 @@ class MyHandler(BaseHTTPRequestHandler):
                self.wfile.write(f.read())
                f.close()
             except IOError:
-               self.send_error(404, "File not found: %s" % self.path)
+               self.send_error(404, 'Файл не найден: %s' % self.path)
 
     def do_GET(self):
         if not self.do_Auth():
-            self.showAuthResult("Not authenticated")
+            self.showAuthResult('Не авторизирован')
             return
 
         #GET
@@ -178,7 +179,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         if not self.do_Auth():
-            self.showAuthResult("Not authenticated")
+            self.showAuthResult('Не авторизирован')
             return
 
         #GET
@@ -221,7 +222,7 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
         self.camFps  = self.Config.cam_fps
         self.camQlt  = self.Config.cam_quality
         #Robot
-        self.robot = Robot(Config.robot_device, Config.robot_speed)
+        self.robot = Robot(Config.robot_port, Config.robot_baudrate)
 
     def CamStart(self):
         self.capture = cv.CaptureFromCAM(self.camNum)
@@ -236,17 +237,17 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
         #print cv.GetCaptureProperty(self.capture,cv.CV_CAP_PROP_FRAME_HEIGHT)
 
         if not self.capture:
-            sys.stderr.write("[WEBCAM] Error opening\r")
+            sys.stderr.write(u'[WEBCAM] Ошибка открытия\r')
             return
 
-        sys.stderr.write("[WEBCAM] start capture\r")
+        sys.stderr.write(u'[WEBCAM] Начало захвата\r')
         cv.SetCaptureProperty(self.capture,cv.CV_CAP_PROP_FPS,self.camFps)
         self.SetResolution(self.camMode)
 		
     def CamStop(self):
         if not self.capture:
             del self.capture
-        sys.stderr.write("[WEBCAM] stop capture\r")
+        sys.stderr.write(u'[WEBCAM] Конец захвата\r')
 
     def SetResolution(self, mode):
         self.camWidth, self.camHeight = ResMode[mode]
@@ -314,9 +315,9 @@ if __name__ == "__main__":
         elif 'restart' == sys.argv[1]:
             daemon.restart()
         else:
-            print "Unknown command"
+            print u'Неизвестрый параметр'
             sys.exit(2)
         sys.exit(0)
     else:
-        print "usage: %s start|stop|restart" % sys.argv[0]
+        print u'Запуск: %s start|stop|restart' % sys.argv[0]
         sys.exit(2)
