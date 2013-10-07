@@ -1,9 +1,13 @@
 #!/usr/bin/python
 # coding: utf-8
 
-import sys, time
-from daemon import Daemon
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
+import sys
+import time
+from daemon import Daemon
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from SocketServer import ThreadingMixIn
 import threading
@@ -11,7 +15,7 @@ import cgi
 import string, sys, time
 import os
 from cv2 import cv
-import Image, ImageDraw, ImageFont
+#import Image, ImageDraw, ImageFont
 #import StringIO
 #my import
 from const  import *
@@ -73,7 +77,7 @@ class MyHandler(BaseHTTPRequestHandler):
             action = get_data.get('action')[0]
         else: action = ""
 
-        if action == "mjpeg": #get mjpeg
+        if action == "mjpeg": #отдать mjpeg-поток
             self.send_response(200)
             self.wfile.write("Content-Type: multipart/x-mixed-replace; boundary=--aaboundary")
             self.wfile.write("\r\n\r\n")
@@ -85,7 +89,7 @@ class MyHandler(BaseHTTPRequestHandler):
             frameSize = 0
             frameSpeed = 0
             self.log_error("[WEBCAM] start while")
-            #while server runed
+            #Пока Сервер запущен
             while self.server.run:
                 #try:
                     frameCount = frameCount + 1
@@ -112,12 +116,12 @@ class MyHandler(BaseHTTPRequestHandler):
                         frameCount = 0
                         frameSize = len(JpegData)/1024
                         frameSpeed = int(8*len(JpegData)*frameFps/1024)
-                        text = u'Захват %s fps' % str(frameFps)
+                        text = u'Захват %s к/с' % str(frameFps)
                         text = text + u', размер изображения: '+str(frameSize)+u'кБ'
                         text = text + u', скорость захвата: '+str(frameSpeed)+u'кб/с'
                         self.log_error('[WEBCAM] ' + text)
                         #if not self.do_Auth():
-                            #self.log_error("Not authenticated")
+                            #self.log_error(u'Не авторизирован')
                             #break
                     #time.sleep(0.05)
                     cv.WaitKey(20)
@@ -125,7 +129,7 @@ class MyHandler(BaseHTTPRequestHandler):
                     #time.sleep(1)
                     #break 
             self.log_error("[WEBCAM] stop while")
-        elif action == "jpeg": #get one jpeg
+        elif action == "jpeg": #Отдать один кадр JPEG
             self.send_response(200)
             self.send_header('Content-type','image/jpeg')
             self.end_headers()
@@ -133,16 +137,15 @@ class MyHandler(BaseHTTPRequestHandler):
             cv2mat=cv.EncodeImage(".jpeg",img,(cv.CV_IMWRITE_JPEG_QUALITY,self.server.camQlt))
             JpegData=cv2mat.tostring()
             self.wfile.write(JpegData)
-        elif action == "temperature": #get temperature
+        elif action == "temperature": #Вернуть температуру
             text =  self.server.robot.get_temperature()
             self.wfile.write(text)
-        elif action == "pressure": #get pressure"
+        elif action == "pressure": #Вернуть давление
             temp = int(self.server.robot.get_pressure())
             text = str(int(temp/133.33))
-            #text = self.server.robot.getPressure()
             self.wfile.write(text)
-        elif self.path != "/": #get content
-            #check allow ext
+        elif self.path != "/": #Вернуть файл
+            #Проверка что файл разрешен
             if file_allow(self.path):
                 try:
                     f = open(self.server.Config.www_home + self.path)
@@ -151,12 +154,11 @@ class MyHandler(BaseHTTPRequestHandler):
 	            self.end_headers()
 	            self.wfile.write(f.read())
                     f.close()
-                    #self.log_error("file: "+self.path+" has file type "+file_type(self.path))
                 except IOError:
-                    self.send_error(404,'Файл не найден: %s' % self.path)
-            else: #access denied
-                self.send_error(404,'Файл не найден: %s' % self.path)
-        else: #MainHTML
+                    self.send_error(404,u'Файл не найден: %s' % self.path)
+            else: #Файл не разрешен
+                self.send_error(404,u'Файл не найден: %s' % self.path)
+        else: #Главная страница
             try:
                f = open(self.server.Config.www_home + '/' + self.server.Config.www_main)
                self.send_response(200)
@@ -165,29 +167,27 @@ class MyHandler(BaseHTTPRequestHandler):
                self.wfile.write(f.read())
                f.close()
             except IOError:
-               self.send_error(404, 'Файл не найден: %s' % self.path)
+               self.send_error(404, u'Файл не найден: %s' % self.path)
 
     def do_GET(self):
         if not self.do_Auth():
-            self.showAuthResult('Не авторизирован')
+            self.showAuthResult(u'Не авторизирован')
             return
-
         #GET
         get_data = cgi.parse_qs(self.path[2:])
-        #ShowPage
+        #Обработать запрос
         self.showPage('GET',get_data,{})
 
     def do_POST(self):
         if not self.do_Auth():
-            self.showAuthResult('Не авторизирован')
+            self.showAuthResult(u'Не авторизирован')
             return
-
         #GET
         get_data = cgi.parse_qs(self.path[2:])
         cl, cl2 = cgi.parse_header(self.headers.get('content-length'))
         qs = self.rfile.read(int(cl))
         post_data = cgi.parse_qs(qs.decode())
-        #Resolution
+        #Разрешение кадра с камеры
         if post_data.get('resolution') != None:
             if (len(post_data.get('resolution')) > 0):
                 mode = post_data.get('resolution')[0]
@@ -196,14 +196,14 @@ class MyHandler(BaseHTTPRequestHandler):
                 else: 
                     None
             return 
-        #Command
+        #Комманды
         if post_data.get('action') != None:
             cmd = post_data.get('action')[0]
             result = self.server.robot.sendCommand(cmd)
             self.wfile.write(result)
             self.log_error("[COMMAND] %s" % result)
             return
-        #ShowPage
+        #Обработать запрос
 	self.showPage('GET',get_data,post_data)
 
 
@@ -221,12 +221,12 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
         self.camMode = self.Config.cam_mode
         self.camFps  = self.Config.cam_fps
         self.camQlt  = self.Config.cam_quality
-        #Robot
+        #Инициализация робота
         self.robot = Robot(Config.robot_port, Config.robot_baudrate)
 
     def CamStart(self):
         self.capture = cv.CaptureFromCAM(self.camNum)
-        #check cam
+        #Пробуем захватить кадр
         try:
             cv.QueryFrame(self.capture)
         except:

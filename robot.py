@@ -47,7 +47,7 @@ class Robot:
                 return command
             else:
                 return result 
-        else: return u'Unknown command "%s"' % command
+        else: return u'Неизвестная комманда "%s"' % command
                                       
     def invoke(self, command, check=True):
         #wait while busy
@@ -104,9 +104,11 @@ class Robot:
 
 if __name__ == '__main__':
     client = Robot('/dev/ttyUSB0', 9600)
-#    time.sleep(5)
     print client.move_forward()
+    time.sleep(5)
     print client.move_backward()
+    time.sleep(5)
     print client.invoke('hello, robot!')
     print client.sendCommand('W')
+    time.sleep(5)
     client.close()
