@@ -75,7 +75,7 @@ class MyHandler(BaseHTTPRequestHandler):
     def showPage(self,method,get_data,post_data):
         if get_data.get('action') != None:
             action = get_data.get('action')[0]
-        else: action = ""
+        else: action = None
 
         if action == "mjpeg": #отдать mjpeg-поток
             self.send_response(200)
@@ -134,6 +134,9 @@ class MyHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type','image/jpeg')
             self.end_headers()
             img = cv.QueryFrame(self.server.capture)
+            text = time.strftime("%d/%m/%Y %H:%M:%S",time.localtime())
+            textSize, baseline = cv.GetTextSize(text,self.server.font)
+            cv.PutText(img,text, (textSize[1],2*textSize[1]),self.server.font, textColor)
             cv2mat=cv.EncodeImage(".jpeg",img,(cv.CV_IMWRITE_JPEG_QUALITY,self.server.camQlt))
             JpegData=cv2mat.tostring()
             self.wfile.write(JpegData)
@@ -170,11 +173,21 @@ class MyHandler(BaseHTTPRequestHandler):
                self.send_error(404, u'Файл не найден: %s' % self.path)
 
     def do_GET(self):
-        if not self.do_Auth():
-            self.showAuthResult(u'Не авторизирован')
-            return
         #GET
         get_data = cgi.parse_qs(self.path[2:])
+        #Вернем action
+        if get_data.get('action') != None:
+            action = get_data.get('action')[0]
+        else: action = None
+
+        #Проверка авторизации
+        if not self.do_Auth():
+            #если запрос на получение температуры или давнения, то вернуть пусто
+            if action != "temperature" and action != "pressure":
+                self.showAuthResult(u'Не авторизирован')
+            else: 
+                self.wfile.write('0')
+            return
         #Обработать запрос
         self.showPage('GET',get_data,{})
 

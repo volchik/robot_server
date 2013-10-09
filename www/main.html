@@ -2,147 +2,10 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; Charset=UTF-8">  
 <title>Управление роботом</title>
-<script src="jquery.js" type="text/javascript"></script>
-<script language="Javascript">
-function logout()
-{
-	/**** NEW CODE */
-	try {
-		$.ajax({
-			url: '/',
-			username: 'reset',
-			password: 'reset',
-			statusCode: { 401: function() {} }
-		});
-	} catch (exception) {
-		document.execCommand("ClearAuthenticationCache");
-	}
-	/**** END NEW CODE */
-
-	return false;
-}
-
-function send(data)
-{
-       $.ajax({
-                type: "POST",
-                url: "/",
-                data: "action="+data,
-                success: function(html) {
-                        $("#result").empty();
-                        $("#result").append("Последняя комманда: "+html);
-                }
-        });
-}
-function keyEvent()
-{
-  status='Unicode= '+event.keyCode+' Символ='+String.fromCharCode(event.keyCode);
-  switch (event.keyCode) //Анализ Unicode клавиш
-  {
-        case 37: {send("mot-left"); break} // "Стрелка влево"
-        case 40: {send("mot-rev"); break}  // "Стрелка вниз"
-        case 39: {send("mot-right"); break} // "Стрелка вправо"
-        case 38: {send("mot-fwd"); break}  // "Стрелка вверх"
-        default: switch (String.fromCharCode(event.keyCode)) //Анализ клавиши 
-                 {
-                      case 'W': {send("cam-up"); break}   //Камера вверх
-                      case 'Z': {send("cam-down"); break} //Камера вниз
-                      case 'A': {send("cam-left"); break} //Камера влево
-                      case 'S': {send("cam-right"); break} //Камера вправо
-                      default: {send(String.fromCharCode(event.keyCode)); break} 
-                 }
-  }
-  $("#key").empty();
-  $("#key").append(status);
-}
-var g_nIndex = 0;
-function OnBtnRefresh()
-{
-        document.getElementById("imgDisplay").src = "/?action=jpeg"+g_nIndex;
-        g_nIndex = g_nIndex + 1;
-}
-
-function OnImgLoad()
-{
-        setTimeout("OnBtnRefresh()",50);
-}
-
-function SetResolution(r)
-{
-       if (r == null) r = document.getElementById("resolution").value
-       $.ajax({
-                type: "POST",
-                url: "/",
-                data: "resolution="+r,
-                success: function(html) {
-                }
-        });
-}
-
-var isLightOn = 0;
-function LightOn()  
-{  
-  if (isLightOn)
-  {
-    document.getElementById("imgLight").src = "/img/off.png";
-    send("light-off");
-  }
-  else 
-  {
-    document.getElementById("imgLight").src = "/img/on.png";
-    send("light-on");
-  }
-  isLightOn = 1-isLightOn;
-}  
-
-function ShowTemperature()
-{
-        $.ajax({
-                type: "GET",
-                url: "./?action=temperature",
-                cache: false,
-                success: function(html){
-                        $("#temperature").empty();
-                        $("#temperature").append("Температура: "+html+" грудусов Цельсия");
-                }
-        });
-}
-
-function ShowPressure()
-{
-        $.ajax({
-                type: "GET",
-                url: "/?action=pressure",
-                cache: false,
-                success: function(html){
-                        $("#pressure").empty();
-                        $("#pressure").append("Давление: "+html+" мм. рт. ст.");
-                }
-        });
-}
-
-function Show()
-{
-	ShowTemperature();  
-	ShowPressure();
-}
-
-$(document).ready(function(){  
-	Show();
-	setInterval('Show()',10000);  
-});  
-</script>
-
+<script src="js/jquery.js" type="text/javascript"></script>
+<script src="js/my.js"     type="text/javascript"></script>
 </head>
 <body bgcolor="C0C0C0" onKeyDown="keyEvent()">
-
-<form action="">
-	<p><input type="button" value="Logout" onclick="logout()"></p>
-</form>
-
-<div id="temperature"></div>
-<div id="pressure"></div>
-
 <!--
 	<select id="resolution" width="50" onchange="SetResolution(null)">
 		<option value="0">480x360</option>
@@ -150,39 +13,41 @@ $(document).ready(function(){
 		<option value="2">1280x1024</option>
 	</select>
 -->
-	
 <form action="" id="myform">
-
+	<p><input type="button" value="Logout" onclick="logout()"></p>
 	<table border="0" align="right" cellspacing="0" cellpadding="0" color="black">
 	<tr>
-                <td align="center"><img border="0" height="50" width="50" id="imgLight" src="/img/off.png" onclick="LightOn()"/></td>
-		<td align="center"><img border="0" height="50" width="50" src="/img/cam-up.png" onclick="send('cam-up');"/></td> 
-		<td></td>
+                <td align="center"><img border="0" height="50" width="50" id="imgLight" src="img/light-off.png" onclick="LightOn()"/></td>
+		<td align="center"><img border="0" height="50" width="50" src="img/cam-up.png" onclick="send('cam-up');"/></td> 
+		<td align="left" valign="center" colspan="3">
+                    <div id="temperature"></div>
+                    <div id="pressure"></div>
+                </td>
  	</tr>
 	<tr>
-                <td halign="center"><img border="0" height="50" width="50" src="/img/cam-left.png" onclick="send('cam-left');"/></td>
+                <td halign="center"><img border="0" height="50" width="50" src="img/cam-left.png" onclick="send('cam-left');"/></td>
  		<td>
-<!--                    <img width="480" height="360" id="imgDisplay" src="/?action=jpeg" NOSAVE onLoad="OnImgLoad()" /> -->
+<!--                    <img width="600" height="400" id="imgDisplay" src="/?action=jpeg" NOSAVE onLoad="OnImgLoad()" />  -->
  			<img width="600" height="400" src="/?action=mjpeg"/> 
  		</td>
-                <td valign="center"><img border="0" height="50" width="50" src="/img/cam-right.png" onclick="send('cam-right');"/></td>
+                <td valign="center"><img border="0" height="50" width="50" src="img/cam-right.png" onclick="send('cam-right');"/></td>
                 <td width="50"></td>
 
 		<td align="center" valign="center">
 			<table border="0" cellspacing="0" cellpadding="0" color="black">
 			<tr>
 				<td></td>
-	                	<td><img border="0" height="70" width="70" src="/img/up.png" onclick="send('mot-fwd');"/></td>
+	                	<td><img border="0" height="70" width="70" src="img/mot-fwd.png" onclick="send('mot-fwd');"/></td>
 				<td></td>
 			</tr>
         		<tr>
-                		<td><img  border="0" height="70" width="70" src="/img/left.png" onclick="send('mot-left');"/></td>
+                		<td><img  border="0" height="70" width="70" src="img/mot-left.png" onclick="send('mot-left');"/></td>
 	                	<td></td>
-        	        	<td><img  border="0" height="70" width="70" src="/img/right.png" onclick="send('mot-right');"/></td>
+        	        	<td><img  border="0" height="70" width="70" src="img/mot-right.png" onclick="send('mot-right');"/></td>
         		</tr>
 	        	<tr>
         	        	<td></td>
-                		<td><img  border="0" height="70" width="70" src="/img/down.png" onclick="send('mot-rev');"/></td>
+                		<td><img  border="0" height="70" width="70" src="img/mot-rev.png" onclick="send('mot-rev');"/></td>
 				<td></td>
         		</tr>
 			</table>
@@ -190,16 +55,16 @@ $(document).ready(function(){
  	</tr>
 	<tr>
 		<td></td>
-                <td align="center"><img  border="0" height="50" width="50" src="/img/cam-down.png" onclick="send('cam-down');"/></td>
+                <td align="center"><img  border="0" height="50" width="50" src="img/cam-down.png" onclick="send('cam-down');"/></td>
 		<td></td>
 	</tr>
-	<tr height="20"><td align="center" valign="center" colspan="3"><div id="result"></div></td></tr>
-	<tr height="20"><td align="center" valign="center" colspan="3"><div id="key"></div></td></tr>
         <tr><td align="center" colspan="3">
                         <input type="button" value="480x360" onclick="SetResolution(0)">
                         <input type="button" value="640x480" onclick="SetResolution(1)">
                         <input type="button" value="1280x1024" onclick="SetResolution(2)">
         </td></tr>
+	<tr height="20"><td align="center" valign="center" colspan="3"><div id="result"></div></td></tr>
+	<tr height="20"><td align="center" valign="center" colspan="3"><div id="key"></div></td></tr>
 	</table>
 </form>
 </body>
