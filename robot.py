@@ -14,6 +14,7 @@ class Robot:
         self.port     = port
         self.baudrate = baudrate
         self.timeout  = timeout
+        self.serial   = None
         self.connect()
         #robot command dictionary
         self.commands = {
@@ -29,12 +30,12 @@ class Robot:
              "light-off"   : "LF"
              		}
     def connect(self):
-        self.port = serial.Serial(self.port, self.baudrate, timeout = self.timeout)
+        self.serial = serial.Serial(self.port, self.baudrate, timeout = self.timeout)
         time.sleep(2) # waiting the initialization...
         self.busy = False
 
     def close(self):
-        self.port.close()
+        self.serial.close()
 
     def reconnect(self):
         self.close()
@@ -55,8 +56,8 @@ class Robot:
             None
         #set busy
         self.busy = True
-        self.port.write(command+'\r')
-        result = self.port.readline().replace('\n', '').replace('\r', '')
+        self.serial.write(command+'\r')
+        result = self.serial.readline().replace('\n', '').replace('\r', '')
         self.busy = False
         if check and result[0:len(command)] != command:
             return u'Error: Отправлено: "%s" Получено: "%s"' % (command, result)

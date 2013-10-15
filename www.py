@@ -328,7 +328,7 @@ if __name__ == "__main__":
         elif 'restart' == sys.argv[1]:
             daemon.restart()
         else:
-            print u'Неизвестрый параметр'
+            print u'Неизвестный параметр'
             sys.exit(2)
         sys.exit(0)
     else:
